@@ -4,14 +4,14 @@ import java.util.Random;
 
 public class Controller {
 
-    private View view;
+    private project_DesignFrame view;
     private Model model;
     MulticastSocket multicastSocket = null;
     MulticastSocket defaultMulticastSocket = null;
     InetAddress multicastGroup = null;
     private String sendAddress;
 
-    public Controller(View view, Model model){
+    public Controller(project_DesignFrame view, Model model){
         this.view = view;
         this.model = model;
         initLoginController();
