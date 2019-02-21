@@ -31,9 +31,12 @@ public class project_DesignFrame extends JFrame {
 	 * Launch the application.
 	 */
 	public static void main(String[] args) {
+		System.setProperty("java.net.preferIPv4Stack", "true");
 		project_DesignFrame frame = new project_DesignFrame();		
-        Model m = new Model();
-        Controller c = new Controller(frame, m);	
+        Model model = new Model();
+        Archive archive = new Archive();
+        Profile profile = new Profile();
+        Controller c = new Controller(frame, model, archive, profile);	
 		EventQueue.invokeLater(new Runnable() {				       
 			public void run() {
 				try {					

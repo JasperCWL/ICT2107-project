@@ -26,7 +26,6 @@ public class View {
     private JTextField messageTextField;
     private JTextArea messageTextArea;
 
-
     public View(){
         initialize();
     }
