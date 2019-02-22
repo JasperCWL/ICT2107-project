@@ -5,7 +5,7 @@ import java.util.ArrayList;
 
 public class Controller {
 
-	private project_DesignFrame view;
+	private UI view;
 	private Model model;
 	private Archive archive;
 	private Profile profile;
@@ -48,8 +48,8 @@ public class Controller {
 	private int NAME = 2;
 	private int PREVIOUS = 3;
 
-	public Controller(project_DesignFrame view, Model model, Archive archive, Profile profile){
-		this.view = view;
+	public Controller(UI frame, Model model, Archive archive, Profile profile){
+		this.view = frame;
 		this.model = model;
 		this.archive = archive;
 		this.profile = profile;
@@ -119,6 +119,10 @@ public class Controller {
 			} catch (IOException e1) {
 				e1.printStackTrace();
 			}
+		});
+		view.getUsersButton().addActionListener(e->{
+			UserLists dialog = new UserLists(model);
+			dialog.setVisible(true);
 		});
 	}
 
@@ -284,7 +288,6 @@ public class Controller {
 						view.getMessageTextArea().append("Username already taken, please choose another username.\n");		
 					}
 					else if(msg[CMD].equals(IPE)) {
-						System.out.println("GOT?");
 						IPCOUNTER = Integer.parseInt(msg[PREVIOUS])+1;
 						view.getMessageTextArea().append("Ip address already taken, please try again.\n");		
 					}
@@ -359,12 +362,10 @@ public class Controller {
 							if(msg.length==3) 
 							{
 								model.setNameList(groupName);
-								displayUserList();
 								view.getMessageTextArea().append(groupName + " has joined the chat\n");
 							}
 							else {
 								model.setNameList(groupName, msg[PREVIOUS]);
-								displayUserList();
 								view.getMessageTextArea().append(msg[PREVIOUS]+ " has updated name to "+ groupName+"\n");
 							}
 						}

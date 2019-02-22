@@ -6,6 +6,7 @@ import com.sun.jmx.snmp.SnmpStringFixed;
 
 public class Model {
 
+	private boolean firstTime = true;
     private String username = "";
     private Map<String, String> groupList = new HashMap<>();
     private ArrayList<String> nameList = new ArrayList<>();
@@ -16,7 +17,11 @@ public class Model {
 
     public void setUsername(String username){
         this.username = username;
-        nameList.add(0, username);
+        if(firstTime==true)
+        		nameList.add(0, username);
+        else
+        		nameList.set(0, username);
+        firstTime=false;
     }
 
     public void setGroupList(String groupName, String ip){

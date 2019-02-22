@@ -78,9 +78,7 @@ public class Profile {
 		{
 			//never receive the data
 		    privateMulticastSocket.receive(recv_packet);
-			System.out.println("DID IT WENT In2?");
 			byte [] imageData = recv_packet.getData();
-			System.out.println("DID IT WENT In3?");
 		    imageData = Files.readAllBytes(friendPic.toPath());
 		    System.out.println("DID IT WENT IT?");
 		    imageReceivingThread.interrupt();
