@@ -5,6 +5,7 @@ import java.net.InetAddress;
 import java.net.MulticastSocket;
 import java.net.SocketException;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 
 public class PrivateChat {
 
@@ -30,6 +31,10 @@ public class PrivateChat {
 	private String LC = "LeftChat";
 	private String LG = "LeftGroup";
 	
+	private String RN = "ReceivedName";
+	private String NU = "NewUser";
+	
+	private ArrayList<String> groupUserList = new ArrayList<>();
 	String currentGroupIP;
 
 	//Indexes
@@ -67,6 +72,7 @@ public class PrivateChat {
 					joinPrivateGroup();
 				else
 					updateGroupMulticast();
+				view.initializeNewJList();
 			} catch (IOException e1) {
 				e1.printStackTrace();
 			}
@@ -124,6 +130,17 @@ public class PrivateChat {
 						if(systemMsg[CMD].equals("LG")){
 							
 						}
+						//update the requester with own username
+						else if(systemMsg[CMD].equals(NU)) {
+							sendPackets(RN, model.getUsername());
+						}
+						//requester receiving the names
+						else if(systemMsg[CMD].equals(RN)) {
+							String username = systemMsg[NAME];
+							if(!model.getCurrentGroupNameList().contains(username)) {
+								model.setCurrentGroupNameList(username);
+							}
+						}
 						else
 							view.getMessageTextArea().append(msg + "\n");	
 					}catch (IOException ex) {
@@ -143,8 +160,8 @@ public class PrivateChat {
 		setCurrentGroup();
 		currentMulticastGroup = InetAddress.getByName(currentGroupIP);
 		view.getMessageTextArea().append(currentGroupIP + "ANOTHER: "+ currentMulticastGroup);
-
 		multicastSocket.joinGroup(currentMulticastGroup);
+		getAllExistingUsernames();
 	}
 
 	public void sendMessage() throws IOException {
@@ -207,6 +224,10 @@ public class PrivateChat {
 		DatagramSocket sendSocket = new DatagramSocket();
 		sendSocket.send(sendPacket);
 		sendSocket.close();
+	}
+	
+	public void getAllExistingUsernames() throws IOException {
+		sendPackets(NU, "doesntmatter");
 	}
 	
 	public String convertMessage(DatagramPacket message) {

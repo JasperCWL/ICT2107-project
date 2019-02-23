@@ -8,11 +8,22 @@ public class Model {
 
 	private boolean firstTime = true;
     private String username = "";
+    
+    //Array containing group name and their respective ip address
     private Map<String, String> groupList = new HashMap<>();
-    private ArrayList<String> groupnameList = new ArrayList<>();    
+    
+    //Array containing groups that you are added to
+    private ArrayList<String> groupnameList = new ArrayList<>();   
+    
+    //Array containing every user
     private ArrayList<String> nameList = new ArrayList<>();
+    
+    //Arrays for adding new users to group
     private ArrayList<String> usersToInvite = new ArrayList<>();
     private Map<String, String> usersToAddMap = new HashMap<>();
+    
+    //Temp array for current group user list
+    private ArrayList<String> currentGroupNameList = new ArrayList<>();
 
     public String getUsername(){
         return username;
@@ -91,5 +102,13 @@ public class Model {
     public void clearUsersToAddMap() {
     		this.usersToAddMap.clear();
     		this.usersToInvite.clear();
+    }
+    
+    public ArrayList<String> getCurrentGroupNameList() {
+		return this.currentGroupNameList;
+}
+    
+    public void setCurrentGroupNameList(String username) {
+    		this.currentGroupNameList.add(username);
     }
 }

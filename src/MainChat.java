@@ -50,7 +50,8 @@ public class MainChat extends JFrame {
 	private JButton btnBack;
 
 	private JList groupJList;
-
+	
+	private ArrayList<String> groupUserList = new ArrayList<>();
 	private ArrayList<String> groupList;
 	private String selectedGroup;
 
@@ -205,12 +206,26 @@ public class MainChat extends JFrame {
 		});
 		
 		groupUsersJList = new JList();
+		groupUserList = model.getCurrentGroupNameList();
+		groupUsersJList.setModel(new AbstractListModel(){
+
+			@Override
+			public int getSize() {
+				return groupUserList.size();
+			}
+
+			@Override
+			public Object getElementAt(int i) {
+				return groupUserList.get(i);
+			}
+		});
 		groupUsersJList.setBounds(668, 135, 130, 306);
 		contentPane.add(groupUsersJList);
 		
 		viewProfileBtn = new JButton("View Profile");
 		viewProfileBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				//action for view
 			}
 		});
 		viewProfileBtn.setBounds(678, 453, 117, 29);
@@ -295,6 +310,21 @@ public class MainChat extends JFrame {
 	}
 	public void setGroupUsersLbl() {
 		this.groupUsersLbl.setText(selectedGroup + "'s Users");
+	}
+	public void initializeNewJList() {
+		groupUserList = model.getCurrentGroupNameList();
+		groupUsersJList.setModel(new AbstractListModel(){
+
+			@Override
+			public int getSize() {
+				return groupUserList.size();
+			}
+
+			@Override
+			public Object getElementAt(int i) {
+				return groupUserList.get(i);
+			}
+		});
 	}
 	
 }

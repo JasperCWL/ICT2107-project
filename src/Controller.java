@@ -35,6 +35,9 @@ public class Controller {
 	private String LC = "LeftChat";
 	private String LG = "LeftGroup";
 
+	private String RN = "ReceivedName";
+	private String NU = "NewUser";
+	
 	private int TIMEOUT = 1000;
 
 	private int IPCOUNTER = 2;
@@ -234,7 +237,7 @@ public class Controller {
 	}
 
 	public void getAllExistingUsernames() throws IOException {
-		sendPackets("NU", "doesntmatter");
+		sendPackets(NU, "doesntmatter");
 	}
 
 	public void displayUserList(){
@@ -319,10 +322,10 @@ public class Controller {
 						//receiving possible duplicates to check
 						view.getMessageTextArea().append("receiving duplicates\n");
 						view.getMessageTextArea().append("HIS USERNAME " + msg[USERNAME]);
-						if(msg[CMD].equals("NU")) {
-							sendPackets("NewUser", model.getUsername());
+						if(msg[CMD].equals(NU)) {
+							sendPackets(RN, model.getUsername());
 						}
-						else if(msg[CMD].equals("NewUser")) {
+						else if(msg[CMD].equals(RN)) {
 							String username = groupName;
 							if(!model.checkIfUsernameExist(username)) {
 								model.setNameList(username);
@@ -361,11 +364,6 @@ public class Controller {
 								view.getMessageTextArea().append(msg[PREVIOUS]+ " has updated name to "+ groupName+"\n");
 							}
 						}
-						//						else if(msg[CMD].equals(UGL)) {
-						//							String ip = msg[PREVIOUS];
-						//							model.setGroupList(groupName, ip);
-						//							view.getMessageTextArea().append(groupName + ": " + ip + "\n");
-						//						}
 						else if(msg[CMD].equals("Invitation") && msg[NAME].equals(model.getUsername())) {	
 							view.getMessageTextArea().append("Groupname: "+msg[PREVIOUS]+" \nIP: " + msg[4] );
 							model.setGroupList(msg[PREVIOUS], msg[4]);
