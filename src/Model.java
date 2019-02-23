@@ -9,7 +9,10 @@ public class Model {
 	private boolean firstTime = true;
     private String username = "";
     private Map<String, String> groupList = new HashMap<>();
+    private ArrayList<String> groupnameList = new ArrayList<>();    
     private ArrayList<String> nameList = new ArrayList<>();
+    private ArrayList<String> usersToInvite = new ArrayList<>();
+    private Map<String, String> usersToAddMap = new HashMap<>();
 
     public String getUsername(){
         return username;
@@ -24,10 +27,9 @@ public class Model {
         firstTime=false;
     }
 
-    public void setGroupList(String groupName, String ip){
-        // name = key
-        // ip = value
+    public void setGroupList(String groupName, String ip) {
         groupList.put(groupName, ip);
+        groupnameList.add(groupName);
     }
     
     public void setNameList(String userName){
@@ -65,11 +67,29 @@ public class Model {
     		nameList.remove(username);
     }
 	
-//	public void displayUserList(){
-//		System.out.println("ASDSDSDA");
-//		   for (String username: this.nameList) 
-//		   {
-//		       View.
-//		}
-//	}
+    public Map<String, String> getGroupList(){
+    		return this.groupList;
+    }
+    
+    public ArrayList<String> getGroupnameList(){
+    		return this.groupnameList;
+    }
+    
+    public ArrayList<String> getUserToInvite() {
+    		return this.usersToInvite;
+    }
+    
+    public Map<String, String> getUsersToAddMap() {
+    		return this.usersToAddMap;
+    }
+    
+    public void setUsersToAddMap(String username, String groupName) {
+    		this.usersToAddMap.put(username, groupName);
+    		this.usersToInvite.add(username);
+    }
+    
+    public void clearUsersToAddMap() {
+    		this.usersToAddMap.clear();
+    		this.usersToInvite.clear();
+    }
 }

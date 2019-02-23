@@ -2,6 +2,8 @@ import java.io.File;
 import java.io.IOException;
 import java.net.*;
 import java.util.ArrayList;
+import java.util.Map;
+import java.util.Set;
 
 public class Controller {
 
@@ -9,6 +11,8 @@ public class Controller {
 	private Model model;
 	private Archive archive;
 	private Profile profile;
+
+	PrivateChat privateChat;
 
 	MulticastSocket multicastSocket = null;
 	MulticastSocket defaultMulticastSocket = null;
@@ -28,13 +32,15 @@ public class Controller {
 	private String UGN = "UpdateGroupname";
 	private String UGL = "UpdateGroupList";
 
-	private String LC = "LeaveChat";
-	private String LG = "LeaveGroup";
+	private String LC = "LeftChat";
+	private String LG = "LeftGroup";
 
 	private int TIMEOUT = 1000;
 
-	private int IPCOUNTER = 1;
+	private int IPCOUNTER = 2;
 	private String IPE = "IpAddressExists";
+
+	private boolean LoggedIn = false;
 
 	private String DEFAULTGROUP = "230.1.1.1";
 	//Searches
@@ -53,7 +59,6 @@ public class Controller {
 		this.model = model;
 		this.archive = archive;
 		this.profile = profile;
-		archive = new Archive();
 		initLoginController();
 		Thread defaultGroupThread = new Thread(new Runnable(){
 			@Override
@@ -66,16 +71,6 @@ public class Controller {
 			}
 		});
 		defaultGroupThread.start();
-//		new Thread(new Runnable(){
-//			@Override
-//			public void run(){
-//				try {
-//					joinDefaultGroup();
-//				} catch (IOException e) {
-//					e.printStackTrace();
-//				}
-//			}
-//		}).start();
 	}
 
 	public void initLoginController(){
@@ -89,12 +84,10 @@ public class Controller {
 			}
 			//			updateUserName();
 		});
-		view.getJoinGroupButton().addActionListener(e->{
-			try {
-				joinGroup();
-			} catch (IOException e1) {
-				e1.printStackTrace();
-			}
+
+		view.getGroupsButton().addActionListener(e->{
+			view.setVisible(false);
+			privateChat = new PrivateChat(view, model, profile, archive);
 		});
 
 		view.getCreateGroupButton().addActionListener(e->{
@@ -106,18 +99,11 @@ public class Controller {
 		});
 		view.getSendMessageButton().addActionListener(e->{
 			try {
-//				sendMessage();
+				//				sendMessage();
 				profile.requestImage("Ad");
 				sendPackets("IMG", "SSS");
 			} catch (IOException e1) {
 
-			}
-		});
-		view.getLeaveGroupButton().addActionListener(e->{
-			try {
-				leaveButton();
-			} catch (IOException e1) {
-				e1.printStackTrace();
 			}
 		});
 		view.getUsersButton().addActionListener(e->{
@@ -130,23 +116,7 @@ public class Controller {
 		sendPackets(LC, model.getUsername());
 		multicastSocket.leaveGroup(InetAddress.getByName(sendAddress));
 		// disable and enable buttons
-		view.getJoinGroupButton().setEnabled(true);
-		view.getLeaveGroupButton().setEnabled(false);
 		view.getSendMessageButton().setEnabled(false);
-	}
-
-	public void sendMessage() throws IOException {
-		String x = defaultMulticastSocket.getLocalSocketAddress().toString();
-		String user = view.getUsernameTextField().getText();
-		String message = view.getMessageTextField().getText() + " IP ADDRESS: " + x;
-		byte [] buf = (user + " : " + message).getBytes();
-		// create the send packet
-		DatagramPacket sendPacket
-		= new DatagramPacket(buf, buf.length, InetAddress.getByName(sendAddress), 6789);
-		// create the socket to send the packet
-		DatagramSocket socket = new DatagramSocket();
-		// send the message to ask if group exist
-		socket.send(sendPacket);
 	}
 
 	//update own username
@@ -180,6 +150,7 @@ public class Controller {
 		}
 		if(model.checkIfGroupAddrExist(ipAddress) == false){
 			model.setGroupList(groupName, ipAddress);
+			view.getMessageTextArea().append(model.getGroupAddr(groupName));
 		}
 		view.getMessageTextArea().append(msg + "\n");
 		try {
@@ -203,6 +174,9 @@ public class Controller {
 		sendPackets(CUNE, userName);
 	}
 
+	public void addToGroup(String groupName, String username) {
+
+	}
 	//reply the username exists
 	public void replyUsernameExists(String userName) throws IOException {
 		// send a packet to notify default group if they have seen this group name
@@ -243,12 +217,24 @@ public class Controller {
 		sendSocket.close();
 	}
 
+	//shortcut to send messages for updating username
+	public void sendPackets(String cmd, String username, String groupName, String ip) throws IOException {
+		byte[] buf = (model.getUsername() + " " + cmd + " " + username + " " + groupName + " " + ip).getBytes();
+		DatagramPacket sendPacket = new DatagramPacket(buf, buf.length, defaultGroup, 6789);
+		DatagramSocket sendSocket = new DatagramSocket();
+		sendSocket.send(sendPacket);
+		sendSocket.close();
+	}
+
 	public String[] convertMessage(DatagramPacket message) {
 		byte [] receiveData = message.getData();
 		int length = message.getLength();
 		String [] msg = (new String(receiveData, 0, length)).split(" ");
-		System.out.println(msg[1]);
 		return msg;
+	}
+
+	public void getAllExistingUsernames() throws IOException {
+		sendPackets("NU", "doesntmatter");
 	}
 
 	public void displayUserList(){
@@ -259,12 +245,24 @@ public class Controller {
 		}
 	}
 
+	public void sendInvites() throws IOException {
+		Map map = model.getUsersToAddMap();
+		ArrayList<String> userToInvite = model.getUserToInvite();
+		for (String username: userToInvite) {
+			String groupname = (String) map.get(username);
+			String ip = model.getGroupAddr(groupname);
+			sendPackets("Invitation", username, groupname, ip);
+		} 
+		model.clearUsersToAddMap();
+	}
+
 	public void joinDefaultGroup() throws IOException {
 		// join the group first
 		profile.upLoadImage();
 		defaultGroup = InetAddress.getByName(DEFAULTGROUP);
 		defaultMulticastSocket = new MulticastSocket(6789);
 		defaultMulticastSocket.joinGroup(defaultGroup);
+		getAllExistingUsernames();
 		String x;
 		//		x = defaultMulticastSocket.getLocalAddress().getLocalHost().toString();
 		InetAddress inetAddress = InetAddress.getLocalHost();
@@ -282,13 +280,16 @@ public class Controller {
 					defaultMulticastSocket.receive(dgpReceived);
 					String [] msg = convertMessage(dgpReceived);
 					if(msg[CMD].equals(GNE)){
+						view.getErrorMsg().setText("Group already taken, please choose another group name.\n");
 						view.getMessageTextArea().append("Group already taken, please choose another group name.\n");		
 					}
 					else if(msg[CMD].equals(UNE)) {
+						view.getErrorMsg().setText("Username already taken, please choose another username.\n");
 						view.getMessageTextArea().append("Username already taken, please choose another username.\n");		
 					}
 					else if(msg[CMD].equals(IPE)) {
 						IPCOUNTER = Integer.parseInt(msg[PREVIOUS])+1;
+						view.getErrorMsg().setText("Ip address already taken, please try again.\n");
 						view.getMessageTextArea().append("Ip address already taken, please try again.\n");		
 					}
 				} catch (SocketTimeoutException e) {	
@@ -305,35 +306,26 @@ public class Controller {
 				}
 			}
 			else {
+				if(!model.getUsersToAddMap().isEmpty()) {
+					sendInvites();
+				}
 				try {
 					//defaultMulticastSocket.connect(InetAddress.getByName("230.1.1.1"), 6789);
 					defaultMulticastSocket.receive(dgpReceived);
 					String [] msg = convertMessage(dgpReceived);
-					System.out.println("Username " + msg[USERNAME] + "\nCMD " + msg[CMD] + "\nGROUPNAME " + msg[NAME]);
-					// index 0 is command, index 1 is the group name
 					String groupName = msg[NAME];
 					//if message is from myself, i will skip all this processing
 					if(!msg[USERNAME].equals(model.getUsername())) {
 						//receiving possible duplicates to check
 						view.getMessageTextArea().append("receiving duplicates\n");
-						// check the message, if it is 0x1A -> he wants to know if there is a group that exist
-						if(msg[0].contains("0x1A")){
-							// now check if this groupName exist within our hashMap
-							if(model.getGroupAddr(groupName)!=null){
-								// group name exist! get the ipAddress of the guy who is asking if the group exist
-								InetAddress ipAddress = dgpReceived.getAddress();
-								int port = dgpReceived.getPort();
-								System.out.println(ipAddress);
-								// send him a unicast message and tell him the ipAddress of the group
-								// Firstly, create a packet with destination as his ip address
-								byte[] buf = ("0x1B " + model.getGroupAddr(groupName)).getBytes();
-								// create the send packet
-								DatagramPacket sendPacket
-								= new DatagramPacket(buf, buf.length, ipAddress, port);
-								// create the socket to send the packet
-								DatagramSocket sendSocket = new DatagramSocket();
-								// send the message to the person
-								sendSocket.send(sendPacket);
+						view.getMessageTextArea().append("HIS USERNAME " + msg[USERNAME]);
+						if(msg[CMD].equals("NU")) {
+							sendPackets("NewUser", model.getUsername());
+						}
+						else if(msg[CMD].equals("NewUser")) {
+							String username = groupName;
+							if(!model.checkIfUsernameExist(username)) {
+								model.setNameList(username);
 							}
 						}
 						else if(msg[CMD].equals(CUNE)) {
@@ -369,25 +361,19 @@ public class Controller {
 								view.getMessageTextArea().append(msg[PREVIOUS]+ " has updated name to "+ groupName+"\n");
 							}
 						}
-						else if(msg[CMD].equals(LC)) {
-							model.removeName(groupName);
-							displayUserList();
-							view.getMessageTextArea().append(groupName + " has left the chat\n");
-						}
-						else if(msg[CMD].equals(UGL)) {
-							String ip = msg[PREVIOUS];
-							model.setGroupList(groupName, ip);
-							view.getMessageTextArea().append(groupName + ": " + ip + "\n");
+						//						else if(msg[CMD].equals(UGL)) {
+						//							String ip = msg[PREVIOUS];
+						//							model.setGroupList(groupName, ip);
+						//							view.getMessageTextArea().append(groupName + ": " + ip + "\n");
+						//						}
+						else if(msg[CMD].equals("Invitation") && msg[NAME].equals(model.getUsername())) {	
+							view.getMessageTextArea().append("Groupname: "+msg[PREVIOUS]+" \nIP: " + msg[4] );
+							model.setGroupList(msg[PREVIOUS], msg[4]);
 						}
 						else if(msg[CMD].equals("IMG")) {
 							profile.sendImage("Requestor");
 							view.getMessageTextArea().append("GUANHUA " + "\n");
 						}
-//						else if(msg[CMD].equals(UGL)) {
-//							String ip = msg[PREVIOUS];
-//							model.setGroupList(groupName, ip);
-//							view.getMessageTextArea().append(groupName + ": " + ip + "\n");
-//						}
 					}
 					else
 						continue;
@@ -398,127 +384,8 @@ public class Controller {
 		}
 	}
 
-	private void replyIPAddressExists(int iPCOUNTER) throws IOException {
+	public void replyIPAddressExists(int iPCOUNTER) throws IOException {
 		sendPackets(IPE, "", iPCOUNTER+"");
-
 	}
 
-	public void joinGroup() throws IOException {
-		view.getLeaveGroupButton().setEnabled(true);
-		view.getJoinGroupButton().setEnabled(false);
-		view.getSendMessageButton().setEnabled(true);
-		String groupName = view.getJoinGroupTextField().getText();
-		multicastSocket = new MulticastSocket(6789);
-		// check if this group is found in my group list first
-		if(model.getGroupAddr(groupName) != null){
-			String myGroupAddr = model.getGroupAddr(groupName);
-			// join this group
-			multicastGroup = InetAddress.getByName(myGroupAddr);
-			sendAddress = myGroupAddr;
-			multicastSocket.joinGroup(multicastGroup);
-			//            multicastSocket.setLoopbackMode(true);
-
-			// receive and display to textbox from this group
-			new Thread(new Runnable() {
-				@Override
-				public void run() {
-					byte buf1[] = new byte[1000];
-					DatagramPacket dgpReceived
-					= new DatagramPacket(buf1, buf1.length);
-					while (true) {
-						try {
-							multicastSocket.receive(dgpReceived);
-							byte[] receiveData = dgpReceived.getData();
-							int length = dgpReceived.getLength();
-							// assume we receive string
-							String msg = new String(receiveData, 0, length);
-							view.getMessageTextArea().append(msg + "\n");
-						} catch (Exception e) {
-							e.printStackTrace();
-						}
-					}
-				}
-			}).start();
-			// start the default group
-			new Thread(new Runnable(){
-				@Override
-				public void run(){
-					try {
-						joinDefaultGroup();
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-				}
-			}).start();
-
-			// also, join the default group as well
-		}
-		else {
-			String cmd = "0x1A ";
-			// send a packet to notify default group if they have seen this group name
-			InetAddress defaultGroup = InetAddress.getByName("228.5.6.7");
-			byte[] buf = (cmd + groupName).getBytes();
-			// create the send packet
-			DatagramPacket sendPacket
-			= new DatagramPacket(buf, buf.length, defaultGroup, 6789);
-			// create the socket to send the packet
-			DatagramSocket sendSocket = new DatagramSocket();
-			// send the message to ask if group exist
-			sendSocket.send(sendPacket);
-
-			new Thread(new Runnable() {
-				@Override
-				public void run() {
-					byte buf1[] = new byte[1000];
-					DatagramPacket dgpReceived
-					= new DatagramPacket(buf1, buf1.length);
-
-					while (true) {
-						try {
-							sendSocket.receive(dgpReceived);
-							byte[] receiveData = dgpReceived.getData();
-							int length = dgpReceived.getLength();
-							// assume we receive string
-							String[] msg = (new String(receiveData, 0, length)).split(" ");
-							System.out.println(msg[0]);
-							if (msg[0].contains("0x1B")) {
-								// group exist, get the group ip address
-								String groupAddr = msg[1];
-								sendAddress = groupAddr;
-								// now you get the group address, join that group.
-								//                                multicastSocketGroup = new MulticastSocket(6789);
-								multicastSocket.joinGroup(InetAddress.getByName(groupAddr));
-							}
-
-						} catch (IOException e) {
-							e.printStackTrace();
-						}
-					}
-				}
-			}).start();
-
-			//             this is receiving from the new group.
-			new Thread(new Runnable() {
-				@Override
-				public void run() {
-					byte buf1[] = new byte[1000];
-					DatagramPacket dgpReceived
-					= new DatagramPacket(buf1, buf1.length);
-					while (true) {
-						try {
-							multicastSocket.receive(dgpReceived);
-							byte[] receiveData = dgpReceived.getData();
-							int length = dgpReceived.getLength();
-							// assume we receive string
-							String msg = new String(receiveData, 0, length);
-							view.getMessageTextArea().append(msg + "\n");
-
-						} catch (Exception e) {
-							System.out.println(e);
-						}
-					}
-				}
-			}).start();
-		}
-	}
 }

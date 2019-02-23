@@ -14,8 +14,11 @@ import javax.swing.border.EmptyBorder;
 
 import com.sun.org.apache.xml.internal.resolver.helpers.PublicId;
 
+import jdk.internal.org.objectweb.asm.tree.FrameNode;
+
 import javax.swing.JLabel;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 
@@ -26,17 +29,15 @@ public class UI extends JFrame {
     private JFrame chatFrame;
     private JTextField usernameTextField;
     private JTextField createGroupTextField;
-    private JTextField joinGroupTextField;
 
     private JButton updateUsernameButton;
     private JButton createGroupButton;
-    private JButton joinGroupButton;
-    private JButton leaveGroupButton;
     private JButton sendMessageButton;
-    private JTextField messageTextField;
     private JTextArea messageTextArea;
     private JScrollPane scroll;
     private JButton usersButton;
+    private JButton btnGroups;
+    private JLabel errorMsg;
 
 	/**
 	 * Launch the application.
@@ -44,6 +45,8 @@ public class UI extends JFrame {
 	public static void main(String[] args) {
 		System.setProperty("java.net.preferIPv4Stack", "true");
 		UI frame = new UI();		
+		frame.setPreferredSize(new Dimension(1000, 1000));
+	    frame.setLocationRelativeTo(null);
         Model model = new Model();
         Archive archive = new Archive();
         Profile profile = new Profile();
@@ -69,28 +72,18 @@ public class UI extends JFrame {
 		setTitle("2107 WhatsChat");
 		setBackground(Color.ORANGE);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(100, 100, 616, 419);
+		setBounds(100, 100, 511, 419);
 		contentPane = new JPanel();
 		contentPane.setBackground(Color.ORANGE);
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
 		contentPane.setLayout(null);
         contentPane.setLayout(null);
-
-
-        // send message
-        JLabel lblNewLabel_2 = new JLabel("Send Message");
-        lblNewLabel_2.setBounds(12, 316, 95, 21);
-        contentPane.add(lblNewLabel_2);
-
-        messageTextField = new JTextField();
-        messageTextField.setBounds(119, 316, 342, 26);
-        contentPane.add(messageTextField);
-        messageTextField.setColumns(10);
+        contentPane.setMinimumSize(new Dimension(1000, 1000));
 
         sendMessageButton= new JButton("Send");
         sendMessageButton.setEnabled(true);
-        sendMessageButton.setBounds(483, 316, 103, 28);
+        sendMessageButton.setBounds(292, 346, 103, 28);
         contentPane.add(sendMessageButton);
  
         usersButton = new JButton("Users");
@@ -98,66 +91,55 @@ public class UI extends JFrame {
         	public void actionPerformed(ActionEvent e) {
         	}
         });
-        usersButton.setBounds(497, 11, 89, 29);
+        usersButton.setBounds(203, 346, 89, 29);
         contentPane.add(usersButton);
         
         messageTextArea = new JTextArea(5, 20);
         scroll = new JScrollPane(messageTextArea);
         scroll.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
-        scroll.setLocation(25, 121);
+        scroll.setLocation(27, 128);
         messageTextArea.setBounds(23, 111, 547, 192);
         messageTextArea.setEditable(false);
 //        contentPane.add(messageTextArea);
-        scroll.setSize( 487, 169 );
+        scroll.setSize( 444, 206 );
         contentPane.add(scroll);
-
-
-        // join and leave group
-        JLabel lblJoinGroup = new JLabel("Join Group:");
-        lblJoinGroup.setBounds(25, 73, 71, 16);
-        contentPane.add(lblJoinGroup);
-
-        joinGroupTextField = new JTextField();
-        joinGroupTextField.setBounds(108, 68, 184, 26);
-        contentPane.add(joinGroupTextField);
-        joinGroupTextField.setColumns(10);
-
-        joinGroupButton = new JButton("Join");
-        joinGroupButton.setBounds(304, 67, 179, 29);
-        contentPane.add(joinGroupButton);
-
-        leaveGroupButton = new JButton("Leave");
-        leaveGroupButton.setEnabled(false);
-        leaveGroupButton.setBounds(492, 69, 78, 29);
-        contentPane.add(leaveGroupButton);
 
         // username
         JLabel lblNewLabel = new JLabel("Username: ");
-        lblNewLabel.setBounds(25, 16, 82, 16);
+        lblNewLabel.setBounds(18, 46, 82, 16);
         contentPane.add(lblNewLabel);
 
         usernameTextField = new JTextField();
-        usernameTextField.setBounds(108, 11, 184, 26);
+        usernameTextField.setBounds(108, 41, 184, 26);
         contentPane.add(usernameTextField);
         usernameTextField.setColumns(10);
 
         updateUsernameButton = new JButton("Update");
-        updateUsernameButton.setBounds(304, 10, 179, 29);
+        updateUsernameButton.setBounds(304, 41, 179, 29);
         contentPane.add(updateUsernameButton);
 
         // create group
         JLabel lblNewLabel_1 = new JLabel("Create Group:");
-        lblNewLabel_1.setBounds(25, 46, 82, 16);
+        lblNewLabel_1.setBounds(18, 74, 89, 16);
         contentPane.add(lblNewLabel_1);
 
         createGroupButton = new JButton("Create");
-        createGroupButton.setBounds(304, 40, 179, 29);
+        createGroupButton.setBounds(304, 69, 179, 29);
         contentPane.add(createGroupButton);
 
         createGroupTextField = new JTextField();
-        createGroupTextField.setBounds(108, 41, 184, 26);
+        createGroupTextField.setBounds(108, 69, 184, 26);
         contentPane.add(createGroupTextField);
         createGroupTextField.setColumns(10);
+        
+        btnGroups = new JButton("Chat");
+        btnGroups.setBounds(402, 346, 103, 29);
+        contentPane.add(btnGroups);
+        
+        errorMsg = new JLabel("");
+        errorMsg.setForeground(Color.RED);
+        errorMsg.setBounds(17, 106, 454, 16);
+        contentPane.add(errorMsg);
 
     }
 
@@ -173,13 +155,6 @@ public class UI extends JFrame {
         return createGroupTextField;
     }
 
-    public JTextField getJoinGroupTextField(){
-        return joinGroupTextField;
-    }
-
-    public JTextField getMessageTextField(){
-        return messageTextField;
-    }
 
     public JButton getUpdateUsernameButton(){
         return updateUsernameButton;
@@ -187,14 +162,6 @@ public class UI extends JFrame {
 
     public JButton getCreateGroupButton(){
         return createGroupButton;
-    }
-
-    public JButton getJoinGroupButton(){
-        return joinGroupButton;
-    }
-
-    public JButton getLeaveGroupButton(){
-        return leaveGroupButton;
     }
 
     public JButton getSendMessageButton() {
@@ -207,6 +174,13 @@ public class UI extends JFrame {
     
     public JButton getUsersButton() {
     		return usersButton;
+    }
+    
+    public JButton getGroupsButton() {
+		return btnGroups;
+}
+    public JLabel getErrorMsg() {
+    		return errorMsg;
     }
 }
 
