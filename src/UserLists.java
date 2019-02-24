@@ -1,4 +1,5 @@
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.FlowLayout;
 import java.awt.Frame;
 import java.util.ArrayList;
@@ -58,8 +59,11 @@ public class UserLists extends JDialog {
 		this.model = model;
 		setBounds(100, 100, 450, 300);
 		getContentPane().setLayout(null);
+		getContentPane().setBackground(new Color(255, 245, 238));
 		{
 			JPanel buttonPane = new JPanel();
+			buttonPane.setBorder(null);
+			buttonPane.setBackground(new Color(255, 245, 238));
 			buttonPane.setBounds(0, 239, 450, 39);
 			buttonPane.setLayout(new FlowLayout(FlowLayout.RIGHT));
 			getContentPane().add(buttonPane);
@@ -72,7 +76,7 @@ public class UserLists extends JDialog {
 				});
 				okButton.setActionCommand("OK");
 				buttonPane.add(okButton);
-				getRootPane().setDefaultButton(okButton);
+//				getRootPane().setDefaultButton(okButton);
 			}
 			{
 				JButton cancelButton = new JButton("Cancel");
@@ -117,7 +121,7 @@ public class UserLists extends JDialog {
         });
 		{
 			groupJList = new JList();
-			groupJList.setBounds(16, 24, 153, 216);
+			groupJList.setBounds(16, 24, 165, 216);
 			groupList = model.getGroupnameList();
 			groupJList.setModel(new AbstractListModel(){
 				
@@ -154,17 +158,17 @@ public class UserLists extends JDialog {
 		}
 		{
 			currentGroupLbl = new JLabel("", SwingConstants.CENTER);
-			currentGroupLbl.setBounds(181, 92, 78, 16);
+			currentGroupLbl.setBounds(186, 92, 78, 16);
 			getContentPane().add(currentGroupLbl);
 		}
 		{
 			JLabel lblAllGroups = new JLabel("My Groups");
-			lblAllGroups.setBounds(54, 6, 78, 16);
+			lblAllGroups.setBounds(55, 6, 78, 16);
 			getContentPane().add(lblAllGroups);
 		}
 		{
 			currentUserLbl = new JLabel("", SwingConstants.CENTER);
-			currentUserLbl.setBounds(181, 141, 78, 16);
+			currentUserLbl.setBounds(186, 142, 78, 16);
 			getContentPane().add(currentUserLbl);
 		}
 		

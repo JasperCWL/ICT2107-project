@@ -29,6 +29,8 @@ import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.Map;
 import java.awt.event.ActionEvent;
+import javax.swing.Icon;
+import javax.swing.ImageIcon;
 
 public class MainChat extends JFrame {
 
@@ -60,6 +62,7 @@ public class MainChat extends JFrame {
 	private JButton viewProfileBtn;
 	private JLabel groupUsersLbl;
 	private JLabel groupNameLbl;
+	private JLabel label;
 	/**
 	 * Launch the application.
 	 */
@@ -94,22 +97,22 @@ public class MainChat extends JFrame {
 		setTitle("2107 WhatsChat");
 		setBackground(Color.ORANGE);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(100, 100, 800, 600);
+		setBounds(100, 100, 825, 636);
 		contentPane = new JPanel();
-		contentPane.setBackground(Color.ORANGE);
+		contentPane.setBackground(new Color(255, 245, 238));
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
 		contentPane.setLayout(null);
 		contentPane.setMinimumSize(new Dimension(1000, 1000));
 
 		messageTextField = new JTextField();
-		messageTextField.setBounds(168, 486, 379, 26);
+		messageTextField.setBounds(164, 506, 383, 41);
 		contentPane.add(messageTextField);
 		messageTextField.setColumns(10);
 
 		sendMessageButton= new JButton("Send");
 		sendMessageButton.setEnabled(true);
-		sendMessageButton.setBounds(549, 486, 103, 28);
+		sendMessageButton.setBounds(553, 506, 103, 41);
 		contentPane.add(sendMessageButton);
 
 		usersButton = new JButton("Users");
@@ -117,13 +120,13 @@ public class MainChat extends JFrame {
 			public void actionPerformed(ActionEvent e) {
 			}
 		});
-		usersButton.setBounds(563, 11, 89, 29);
+		usersButton.setBounds(687, 537, 117, 29);
 		contentPane.add(usersButton);
 
 		messageTextArea = new JTextArea(5, 20);
 		scroll = new JScrollPane(messageTextArea);
 		scroll.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
-		scroll.setLocation(168, 135);
+		scroll.setLocation(168, 155);
 		messageTextArea.setBounds(23, 111, 547, 192);
 		messageTextArea.setEditable(false);
 		//        contentPane.add(messageTextArea);
@@ -133,16 +136,16 @@ public class MainChat extends JFrame {
 
 		// join and leave group
 		JLabel lblJoinGroup = new JLabel("My Groups");
-		lblJoinGroup.setBounds(25, 109, 71, 16);
+		lblJoinGroup.setBounds(25, 126, 71, 16);
 		contentPane.add(lblJoinGroup);
 
 		joinGroupButton = new JButton("Join");
-		joinGroupButton.setBounds(25, 436, 131, 29);
+		joinGroupButton.setBounds(25, 453, 131, 29);
 		contentPane.add(joinGroupButton);
 
 		leaveGroupButton = new JButton("Leave");
 		leaveGroupButton.setEnabled(false);
-		leaveGroupButton.setBounds(25, 467, 131, 29);
+		leaveGroupButton.setBounds(25, 486, 131, 29);
 		contentPane.add(leaveGroupButton);
 
 		// username
@@ -156,22 +159,22 @@ public class MainChat extends JFrame {
 		usernameTextField.setColumns(10);
 
 		updateUsernameButton = new JButton("Update");
-		updateUsernameButton.setBounds(99, 68, 110, 29);
+		updateUsernameButton.setBounds(121, 63, 88, 29);
 		contentPane.add(updateUsernameButton);
 
 		// create group
 		groupNameLbl = new JLabel("");
-		groupNameLbl.setBounds(168, 109, 169, 16);
+		groupNameLbl.setBounds(168, 126, 169, 16);
 		contentPane.add(groupNameLbl);
 
-		createGroupButton = new JButton("Create");
-		createGroupButton.setBounds(219, 546, 97, 29);
-		contentPane.add(createGroupButton);
+//		createGroupButton = new JButton("Create");
+//		createGroupButton.setBounds(219, 546, 97, 29);
+//		contentPane.add(createGroupButton);
 
-		createGroupTextField = new JTextField();
-		createGroupTextField.setBounds(23, 546, 184, 26);
-		contentPane.add(createGroupTextField);
-		createGroupTextField.setColumns(10);
+//		createGroupTextField = new JTextField();
+//		createGroupTextField.setBounds(23, 546, 184, 26);
+//		contentPane.add(createGroupTextField);
+//		createGroupTextField.setColumns(10);
 
 		JTextArea groupTextArea = new JTextArea();
 		groupTextArea.setBounds(25, 137, 131, 287);
@@ -183,12 +186,12 @@ public class MainChat extends JFrame {
 		
 
 		btnBack = new JButton("Back");
-		btnBack.setBounds(535, 546, 117, 29);
+		btnBack.setBounds(687, 568, 117, 29);
 		contentPane.add(btnBack);
 
 		groupJList = new JList();
 		groupJList.setSize(131, 287);
-		groupJList.setLocation(25, 137);
+		groupJList.setLocation(25, 154);
 		groupJList.setVisibleRowCount(12);
 		getContentPane().add(groupJList);
 		groupList = model.getGroupnameList();
@@ -219,7 +222,7 @@ public class MainChat extends JFrame {
 				return groupUserList.get(i);
 			}
 		});
-		groupUsersJList.setBounds(668, 135, 130, 306);
+		groupUsersJList.setBounds(674, 155, 130, 318);
 		contentPane.add(groupUsersJList);
 		
 		viewProfileBtn = new JButton("View Profile");
@@ -228,12 +231,16 @@ public class MainChat extends JFrame {
 				//action for view
 			}
 		});
-		viewProfileBtn.setBounds(678, 453, 117, 29);
+		viewProfileBtn.setBounds(687, 486, 117, 29);
 		contentPane.add(viewProfileBtn);
 		
 		groupUsersLbl = new JLabel("");
-		groupUsersLbl.setBounds(668, 109, 117, 16);
+		groupUsersLbl.setBounds(674, 126, 130, 16);
 		contentPane.add(groupUsersLbl);
+		
+		label = new JLabel(new ImageIcon("Images/TalkIcon.png"));
+		label.setBounds(737, 16, 67, 70);
+		contentPane.add(label);
 		groupJList.addListSelectionListener(new ListSelectionListener() {
 
 			@Override

@@ -82,14 +82,6 @@ public class PrivateChat {
 			view.setVisible(false);
 			//			loginPage.set(true;)
 		});
-
-		view.getCreateGroupButton().addActionListener(e->{
-			//			try {
-			////				checkIfGroupExists();
-			//			} catch (IOException e1) {
-			//				e1.printStackTrace();
-			//			}
-		});
 		view.getSendMessageButton().addActionListener(e->{
 			try {
 				sendMessage();
