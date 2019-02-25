@@ -39,6 +39,7 @@ public class Model {
     }
 
     public void setGroupList(String groupName, String ip) {
+    		
         groupList.put(groupName, ip);
         groupnameList.add(groupName);
     }
@@ -110,5 +111,8 @@ public class Model {
     
     public void setCurrentGroupNameList(String username) {
     		this.currentGroupNameList.add(username);
+    }
+    public void clearCurrentGroupNameList() {
+    		this.currentGroupNameList.clear();
     }
 }
