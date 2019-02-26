@@ -39,9 +39,10 @@ public class Model {
     }
 
     public void setGroupList(String groupName, String ip) {
-    		
-        groupList.put(groupName, ip);
-        groupnameList.add(groupName);
+    		if(!groupList.containsKey(groupName)) {
+	        groupList.put(groupName, ip);
+	        groupnameList.add(groupName);
+    		}
     }
     
     public void setNameList(String userName){
@@ -112,6 +113,12 @@ public class Model {
     public void setCurrentGroupNameList(String username) {
     		this.currentGroupNameList.add(username);
     }
+    
+    public void setCurrentGroupNameList(String username, String previous) {
+    		int index = this.currentGroupNameList.indexOf(previous);
+		this.currentGroupNameList.set(index, username);
+}
+    
     public void clearCurrentGroupNameList() {
     		this.currentGroupNameList.clear();
     }

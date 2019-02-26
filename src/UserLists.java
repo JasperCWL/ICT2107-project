@@ -170,19 +170,9 @@ public class UserLists extends JDialog {
 			currentUserLbl = new JLabel("", SwingConstants.CENTER);
 			currentUserLbl.setBounds(186, 142, 78, 16);
 			getContentPane().add(currentUserLbl);
-		}
-		
-//		messageTextArea.setBounds(23, 111, 547, 192);
-//		writeText();
-		
+		}	
 	}
-//	public void writeText() {
-//		nameList = model.getNameList();
-//		for (String username: nameList) 
-//		{
-//			messageTextArea.append("Username: "+nameList.indexOf(username)+ ": "+username+"\n");
-//		}
-//	}
+
 	public String getCurrentUser() {
 		return currentUserLbl.getText();
 	}

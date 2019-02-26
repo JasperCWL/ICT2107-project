@@ -208,6 +208,13 @@ public class UI extends JFrame {
     public JLabel getErrorMsg() {
     		return errorMsg;
     }
+    public void visible() {
+    		this.setVisible(true);
+    }
+    
+    public JButton getCreateBtn() {
+    		return getUpdateUsernameButton();
+    }
 }
 
 
