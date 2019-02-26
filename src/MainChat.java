@@ -177,63 +177,29 @@ public class MainChat extends JFrame {
 		groupNameLbl.setBounds(168, 126, 169, 16);
 		contentPane.add(groupNameLbl);
 
-//		createGroupButton = new JButton("Create");
-//		createGroupButton.setBounds(219, 546, 97, 29);
-//		contentPane.add(createGroupButton);
-
-//		createGroupTextField = new JTextField();
-//		createGroupTextField.setBounds(23, 546, 184, 26);
-//		contentPane.add(createGroupTextField);
-//		createGroupTextField.setColumns(10);
-
 		JTextArea groupTextArea = new JTextArea();
 		groupTextArea.setBounds(25, 137, 131, 287);
         groupTextArea.setColumns(20);
         groupTextArea.setOpaque(false);	
         groupTextArea.setRows(5);
-//		contentPane.add(groupTextArea, BorderLayout.CENTER);
-//		contentPane.add(groupTextArea);
 		
-		
-
 		btnBack = new JButton("Back");
 		btnBack.setBounds(687, 568, 117, 29);
 		contentPane.add(btnBack);
 
 		groupJList = new JList();
+		initializeGroupJList();
+		
 		groupJList.setSize(131, 287);
 		groupJList.setLocation(25, 154);
 		groupJList.setVisibleRowCount(12);
 //		groupJList.setOpaque(false);
 		getContentPane().add(groupJList);
-		groupList = model.getGroupnameList();
-		groupJList.setModel(new AbstractListModel(){
 
-			@Override
-			public int getSize() {
-				return groupList.size();
-			}
-
-			@Override
-			public Object getElementAt(int i) {
-				return groupList.get(i);
-			}
-		});
 		
 		groupUsersJList = new JList();
-		groupUserList = model.getCurrentGroupNameList();
-		groupUsersJList.setModel(new AbstractListModel(){
-
-			@Override
-			public int getSize() {
-				return groupUserList.size();
-			}
-
-			@Override
-			public Object getElementAt(int i) {
-				return groupUserList.get(i);
-			}
-		});
+		initializeUsersJList();
+		
 		groupUsersJList.setBounds(674, 155, 130, 318);
 //		groupUsersJList.setOpaque(false);
 		contentPane.add(groupUsersJList);
@@ -335,14 +301,13 @@ public class MainChat extends JFrame {
 	public String getSelectedGroup() {
 		return selectedGroup;
 	}
-	public void setGroupNameLbl(String groupname) {
-		this.groupNameLbl.setText(groupname);
+	public void setGroupNameLbl() {
+		this.groupNameLbl.setText(selectedGroup);
+		this.groupUsersLbl.setText(selectedGroup + "'s Users");
 
 	}
-	public void setGroupUsersLbl() {
-		this.groupUsersLbl.setText(selectedGroup + "'s Users");
-	}
-	public void initializeNewJList() {
+
+	public void initializeUsersJList() {
 		groupUserList = model.getCurrentGroupNameList();
 		groupUsersJList.setModel(new AbstractListModel(){
 
@@ -354,6 +319,22 @@ public class MainChat extends JFrame {
 			@Override
 			public Object getElementAt(int i) {
 				return groupUserList.get(i);
+			}
+		});
+	}
+	
+	public void initializeGroupJList() {
+		groupList = model.getGroupnameList();
+		groupJList.setModel(new AbstractListModel(){
+
+			@Override
+			public int getSize() {
+				return groupList.size();
+			}
+
+			@Override
+			public Object getElementAt(int i) {
+				return groupList.get(i);
 			}
 		});
 	}

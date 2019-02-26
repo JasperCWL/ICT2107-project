@@ -1,6 +1,7 @@
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -10,7 +11,7 @@ import java.util.Map;
 public class Archive {
 
     private Map<String, File> allFiles = new HashMap<>();
-
+    
 	public void createChatArchive(String groupName) throws IOException{
 		String path = "Archive/"+groupName+".txt";
 		File file = new File(path);
@@ -33,7 +34,7 @@ public class Archive {
 	
 	public void writeChatHistory(String groupName, String textline) throws FileNotFoundException {
 		File chatHistory = getChatHistory(groupName);
-		PrintWriter writer = new PrintWriter(chatHistory);
+		PrintWriter writer = new PrintWriter(new FileOutputStream(chatHistory, true));
 		writer.println(textline);	
 		writer.close();
 	}

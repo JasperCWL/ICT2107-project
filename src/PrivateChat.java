@@ -17,6 +17,7 @@ public class PrivateChat {
 	private Model model;
 	private Profile profile;
 	private Archive archive;
+	private UI loginpage;
 
 	private String CGNE = "CheckGroupNameExist";
 	private String GNE = "GroupnameExist";
@@ -30,12 +31,14 @@ public class PrivateChat {
 
 	private String LC = "LeftChat";
 	private String LG = "LeftGroup";
-	
+
 	private String RN = "ReceivedName";
 	private String NU = "NewUser";
-	
+
 	private ArrayList<String> groupUserList = new ArrayList<>();
 	String currentGroupIP;
+	
+    private boolean isLeader = false;
 
 	//Indexes
 	private int USERNAME = 0;
@@ -50,13 +53,11 @@ public class PrivateChat {
 		this.model = model;
 		this.archive = archive;
 		this.profile = profile;
+		this.loginpage = loginPage;
 		initChatController();
-		setUsername();
 	}
 
 	public void initChatController(){
-		view.setVisible(true);
-
 		view.getUpdateUsernameButton().addActionListener(e->{
 			//			try {
 			////				checkIfUsernameExists();
@@ -78,6 +79,7 @@ public class PrivateChat {
 		});
 
 		view.getBackButton().addActionListener(e->{
+			loginpage.visible();
 			view.setVisible(false);
 			//			loginPage.set(true;)
 		});
@@ -115,32 +117,36 @@ public class PrivateChat {
 				DatagramPacket dgpReceived = new DatagramPacket(buf1, buf1.length);
 				while(true) {
 					try {
-//						getAllExistingUsernames();
-//						view.initializeNewJList();
 						multicastSocket.receive(dgpReceived);
 						String msg = convertMessage(dgpReceived);
 						String[] systemMsg = msg.split(" ");
-						if(systemMsg[CMD].equals("LG")){
-							
-						}
-						//update the requester with own username
-						else if(systemMsg[CMD].equals(NU)) {
-							sendPackets(RN, model.getUsername());
-							String newUser = systemMsg[USERNAME];
-							if(!model.getCurrentGroupNameList().contains(newUser)) {
-								model.setCurrentGroupNameList(newUser);
-								view.initializeNewJList();
-							}							
-						}
-						//requester receiving the names
-						else if(systemMsg[CMD].equals(RN)) {
-							String username = systemMsg[NAME];
-							if(!model.getCurrentGroupNameList().contains(username)) {
-								model.setCurrentGroupNameList(username);
+						if(!systemMsg[USERNAME].equals(model.getUsername()))
+						{
+							if(systemMsg[CMD].equals("LG")){
+							}
+							//update the requester with own username
+							else if(systemMsg[CMD].equals(NU)) {
+								sendPackets(RN, model.getUsername());
+								String newUser = systemMsg[USERNAME];
+								if(!model.getCurrentGroupNameList().contains(newUser)) {
+									model.setCurrentGroupNameList(newUser);
+									view.initializeUsersJList();
+								}							
+							}
+							//requester receiving the names
+							else if(systemMsg[CMD].equals(RN)) {
+								String username = systemMsg[NAME];
+								if(!model.getCurrentGroupNameList().contains(username)) {
+									model.setCurrentGroupNameList(username);
+								}
+							}
+							else 
+							{
+								int actualMsg = 1;
+								view.getMessageTextArea().append(systemMsg[actualMsg] + "\n");
+								archive.writeChatHistory(view.getSelectedGroup(), msg);
 							}
 						}
-						else
-							view.getMessageTextArea().append(msg + "\n");	
 					}catch (IOException ex) {
 						ex.printStackTrace();
 					}catch(NullPointerException ex) {
@@ -157,13 +163,12 @@ public class PrivateChat {
 			multicastSocket.leaveGroup(currentMulticastGroup);
 		setCurrentGroup();
 		currentMulticastGroup = InetAddress.getByName(currentGroupIP);
-		view.getMessageTextArea().append(currentGroupIP + "ANOTHER: "+ currentMulticastGroup);
+		view.getMessageTextArea().append("Multicast address: " + currentMulticastGroup + "\n");
 		multicastSocket.joinGroup(currentMulticastGroup);
 		if(!model.getCurrentGroupNameList().isEmpty())
 			model.clearCurrentGroupNameList();
-//		model.clearCurrentGroupNameList();
 		getAllExistingUsernames();
-		view.initializeNewJList();
+		view.initializeUsersJList();
 	}
 
 	public void sendMessage() throws IOException {
@@ -172,8 +177,9 @@ public class PrivateChat {
 	}
 
 	public void sendPackets(String message) throws IOException {
-		byte[] buf = (model.getUsername() + ": " + message).getBytes();
-		System.out.println(currentMulticastGroup+" THIS");
+		String packedMsg = model.getUsername() + ": " + message;
+		archive.writeChatHistory(view.getSelectedGroup(), packedMsg);
+		byte[] buf = (model.getUsername() + " " + packedMsg).getBytes();
 		DatagramPacket sendPacket = new DatagramPacket(buf, buf.length, currentMulticastGroup, 6789);
 		DatagramSocket sendSocket = new DatagramSocket();
 		sendSocket.send(sendPacket);
@@ -197,6 +203,7 @@ public class PrivateChat {
 	public void setCurrentGroup() {
 		String selectedValue = view.getSelectedGroup();
 		currentGroupIP = model.getGroupAddr(selectedValue);
+		view.setGroupNameLbl();
 	}
 
 	public void setUsername() {
@@ -211,7 +218,7 @@ public class PrivateChat {
 		view.getLeaveGroupButton().setEnabled(false);
 		view.getSendMessageButton().setEnabled(false);
 	}
-	
+
 	public void byebyePacket() throws IOException {
 		byte[] buf = (model.getUsername() + " has left the chat!").getBytes();
 		DatagramPacket sendPacket = new DatagramPacket(buf, buf.length, currentMulticastGroup, 6789);
@@ -227,15 +234,24 @@ public class PrivateChat {
 		sendSocket.send(sendPacket);
 		sendSocket.close();
 	}
-	
+
 	public void getAllExistingUsernames() throws IOException {
 		sendPackets(NU, "doesntmatter");
 	}
-	
+
 	public String convertMessage(DatagramPacket message) {
 		byte [] receiveData = message.getData();
 		int length = message.getLength();
 		String msg = (new String(receiveData, 0, length));
 		return msg;
+	}
+	public void refreshGroupList() {
+		view.initializeGroupJList();
+	}
+	public void refreshUserList() {
+		view.initializeUsersJList();
+	}
+	public void setVisible(boolean value) {
+		view.setVisible(value);
 	}
 }

@@ -43,7 +43,7 @@ public class Controller {
 
 	private String RN = "ReceivedName";
 	private String NU = "NewUser";
-	
+
 	private int TIMEOUT = 1000;
 
 	private int IPCOUNTER = 2;
@@ -69,6 +69,7 @@ public class Controller {
 		this.archive = archive;
 		this.profile = profile;
 		initLoginController();
+		privateChat = new PrivateChat(view, model, profile, archive);
 		Thread defaultGroupThread = new Thread(new Runnable(){
 			@Override
 			public void run(){
@@ -99,6 +100,11 @@ public class Controller {
 
 		view.getGroupsButton().addActionListener(e->{
 			view.setVisible(false);
+			privateChat.setUsername();
+			privateChat.setVisible(true);
+		});
+
+		view.getCreateGroupButton().addActionListener(e->{
 			try {
 				privateChat = new PrivateChat(view, model, profile, archive);
 			} catch (IOException e1) {
@@ -183,6 +189,7 @@ public class Controller {
 		view.getMessageTextArea().append(msg + "\n");
 		model.setUsername(username);
 		update(username, previous);
+		view.getCreateBtn().setText("Update");
 	}
 
 	//update default chat that name has been updated
@@ -224,10 +231,18 @@ public class Controller {
 
 	//search in default chat for usernames duplicates
 	public void checkIfUsernameExists() throws IOException {
-		SEARCHING = true;
-		SEARCHINGUSER = true;
-		String userName = view.getUsernameTextField().getText();
-		sendPackets(CUNE, userName);
+		String possibleUsername = view.getUsernameTextField().getText().toString();
+		if(model.getNameList().contains(possibleUsername)) {
+			view.getErrorMsg().setText("Username is already in used.\n");
+		}
+		else
+		{
+			SEARCHING = true;
+			SEARCHINGUSER = true;
+			String userName = view.getUsernameTextField().getText();
+			sendPackets(CUNE, userName);
+		}
+
 	}
 
 	public void addToGroup(String groupName, String username) {
@@ -241,12 +256,18 @@ public class Controller {
 
 	//search in default chat for groupname duplicates
 	public void checkIfGroupExists() throws IOException {	
-		SEARCHING = true;
-		SEARCHINGGROUP = true;
 		String groupName = view.getCreateGroupTextField().getText();
-		String ipAddress = IPCOUNTER+"";
-		// send a packet to notify default group if they have seen this group name
-		sendPackets(CGNE, groupName, ipAddress);
+		if(model.getGroupList().containsKey(groupName)) {
+			view.getErrorMsg().setText("Groupname is already in used.\n");
+		}
+		else 
+		{
+			SEARCHING = true;
+			SEARCHINGGROUP = true;
+			String ipAddress = IPCOUNTER+"";
+			// send a packet to notify default group if they have seen this group name
+			sendPackets(CGNE, groupName, ipAddress);
+		}
 	}
 
 	//reply that groupname exists
@@ -291,14 +312,6 @@ public class Controller {
 
 	public void getAllExistingUsernames() throws IOException {
 		sendPackets(NU, "doesntmatter");
-	}
-
-	public void displayUserList(){
-		ArrayList<String> nameList = model.getNameList();
-		for (String username: nameList) 
-		{
-			view.getMessageTextArea().append("Username: "+nameList.indexOf(username)+ ": "+username+"\n");
-		}
 	}
 
 	public void sendInvites() throws IOException {
@@ -351,6 +364,7 @@ public class Controller {
 				} catch (SocketTimeoutException e) {	
 					if(SEARCHINGGROUP) {
 						createGroup();
+						privateChat.refreshGroupList();
 						SEARCHINGGROUP = false;
 					}
 					else if(SEARCHINGUSER) {
@@ -415,11 +429,17 @@ public class Controller {
 							else {
 								model.setNameList(groupName, msg[PREVIOUS]);
 								view.getMessageTextArea().append(msg[PREVIOUS]+ " has updated name to "+ groupName+"\n");
+								if(!model.getCurrentGroupNameList().isEmpty())
+									model.setCurrentGroupNameList(groupName, msg[PREVIOUS]);
 							}
+
+							privateChat.refreshUserList();
 						}
-						else if(msg[CMD].equals("Invitation") && msg[NAME].equals(model.getUsername())) {	
-							view.getMessageTextArea().append("Groupname: "+msg[PREVIOUS]+" \nIP: " + msg[4] );
-							model.setGroupList(msg[PREVIOUS], msg[4]);
+						else if(msg[CMD].equals("Invitation") && msg[NAME].equals(model.getUsername())) {
+							int ipIndex = 4;
+							view.getMessageTextArea().append("Groupname: "+msg[PREVIOUS]+" \nIP: " + msg[ipIndex] );
+							model.setGroupList(msg[PREVIOUS], msg[ipIndex]);
+							privateChat.refreshGroupList();
 						}
 						else if(msg[CMD].equals("IMG")) {
 							profile.sendImage("Requestor");
