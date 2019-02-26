@@ -45,7 +45,7 @@ public class PrivateChat {
 
 	private Thread privateGroupThread;
 
-	public PrivateChat(UI loginPage, Model model, Profile profile, Archive archive) {
+	public PrivateChat(UI loginPage, Model model, Profile profile, Archive archive) throws IOException {
 		view = new MainChat(model);
 		this.model = model;
 		this.archive = archive;

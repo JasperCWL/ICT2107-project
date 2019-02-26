@@ -1,5 +1,6 @@
 import java.awt.BorderLayout;
 import java.awt.EventQueue;
+import java.awt.FlowLayout;
 import java.awt.ScrollPane;
 import java.awt.Scrollbar;
 import java.awt.Window;
@@ -35,6 +36,7 @@ import javax.swing.ImageIcon;
 public class MainChat extends JFrame {
 
 	private JPanel contentPane;
+	
 
 	private JFrame chatFrame;
 	private JTextField usernameTextField;
@@ -97,7 +99,7 @@ public class MainChat extends JFrame {
 		setTitle("2107 WhatsChat");
 		setBackground(Color.ORANGE);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(100, 100, 825, 636);
+		setBounds(100, 100, 900, 850);
 		contentPane = new JPanel();
 		contentPane.setBackground(new Color(255, 245, 238));
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
@@ -105,8 +107,12 @@ public class MainChat extends JFrame {
 		contentPane.setLayout(null);
 		contentPane.setMinimumSize(new Dimension(1000, 1000));
 
+		
+
+		
 		messageTextField = new JTextField();
 		messageTextField.setBounds(164, 506, 383, 41);
+		messageTextField.setOpaque(false);		
 		contentPane.add(messageTextField);
 		messageTextField.setColumns(10);
 
@@ -123,13 +129,16 @@ public class MainChat extends JFrame {
 		usersButton.setBounds(687, 537, 117, 29);
 		contentPane.add(usersButton);
 
-		messageTextArea = new JTextArea(5, 20);
+		messageTextArea = new JTextArea(5, 20);		
+		messageTextArea.setBounds(23, 111, 547, 192);
+		messageTextArea.setOpaque(false);			
+		messageTextArea.setEditable(false);
 		scroll = new JScrollPane(messageTextArea);
 		scroll.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
 		scroll.setLocation(168, 155);
-		messageTextArea.setBounds(23, 111, 547, 192);
-		messageTextArea.setEditable(false);
-		//        contentPane.add(messageTextArea);
+		scroll.getViewport().setOpaque(false);
+		scroll.setOpaque(false);
+//		        contentPane.add(messageTextArea);
 		scroll.setSize( 488, 339 );
 		contentPane.add(scroll);
 
@@ -155,6 +164,7 @@ public class MainChat extends JFrame {
 
 		usernameTextField = new JTextField();
 		usernameTextField.setBounds(25, 33, 184, 26);
+		usernameTextField.setOpaque(false);	
 		contentPane.add(usernameTextField);
 		usernameTextField.setColumns(10);
 
@@ -179,6 +189,7 @@ public class MainChat extends JFrame {
 		JTextArea groupTextArea = new JTextArea();
 		groupTextArea.setBounds(25, 137, 131, 287);
         groupTextArea.setColumns(20);
+        groupTextArea.setOpaque(false);	
         groupTextArea.setRows(5);
 //		contentPane.add(groupTextArea, BorderLayout.CENTER);
 //		contentPane.add(groupTextArea);
@@ -193,6 +204,7 @@ public class MainChat extends JFrame {
 		groupJList.setSize(131, 287);
 		groupJList.setLocation(25, 154);
 		groupJList.setVisibleRowCount(12);
+//		groupJList.setOpaque(false);
 		getContentPane().add(groupJList);
 		groupList = model.getGroupnameList();
 		groupJList.setModel(new AbstractListModel(){
@@ -223,6 +235,7 @@ public class MainChat extends JFrame {
 			}
 		});
 		groupUsersJList.setBounds(674, 155, 130, 318);
+//		groupUsersJList.setOpaque(false);
 		contentPane.add(groupUsersJList);
 		
 		viewProfileBtn = new JButton("View Profile");
@@ -254,6 +267,17 @@ public class MainChat extends JFrame {
 				messageTextArea.setText(selectedGroup);
 			}
 		});
+		
+		
+		//jasper's test frame ----------------------------------
+				JLabel lblBackgroundImage = new JLabel("");
+				lblBackgroundImage.setIcon(new ImageIcon("Images/abstract.jpg"));
+				lblBackgroundImage.setBounds(-400, 0, 1300, 900);
+		        contentPane.add(lblBackgroundImage);
+		        
+
+		        
+		        //end of jasper's test FRAME -----------------------------
 	}
 
 	public JFrame getChatFrame(){

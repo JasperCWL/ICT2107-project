@@ -10,6 +10,7 @@ import java.net.URL;
 import java.nio.file.Files;
 
 import javax.imageio.ImageIO;
+import javax.swing.JOptionPane;
 
 public class Profile {
 
@@ -27,7 +28,19 @@ public class Profile {
 	Thread imageReceivingThread;
 	
 	BufferedImage image = null;
+	
+	//get profile picture
+	public File getImagePath() {
+		return this.profilePic;
+	}
+	
+	public void setImage(String filepath) {
+		//update the file path		
+		//set to profilePicLocation
+		this.profilePicLocation = filepath;
+	}
 
+	//hard coded method to upload photo into application
 	public void upLoadImage() {
 		try {
 
@@ -42,6 +55,7 @@ public class Profile {
 		System.out.println("Done");
 	}
 
+	//convert my display photo into byte array and send it to the person who requests for it
 	public void sendImage(String requestor) throws IOException {
 		image = ImageIO.read(profilePic);
 		ByteArrayOutputStream baos = new ByteArrayOutputStream(); 
@@ -54,6 +68,7 @@ public class Profile {
 		clientSocket.send(packet);
 	}
 	
+	//ask the person to send me his image, open a exclusive thread just to receive the image
 	public void requestImage(String username) {
 		imageReceivingThread = new Thread(new Runnable(){
 			@Override
@@ -68,6 +83,7 @@ public class Profile {
 		imageReceivingThread.start();
 	}
 	
+	//how the data is being convert from byte array back into image, stops thread when image is received
 	public void receivingImage() throws IOException {
 		privateGroup = InetAddress.getByName(PRIVATEGROUP);
 		privateMulticastSocket = new MulticastSocket(6789);
