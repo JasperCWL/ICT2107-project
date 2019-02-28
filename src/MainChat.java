@@ -50,6 +50,7 @@ public class MainChat extends JFrame {
 	private JScrollPane scroll;
 	private JButton usersButton;
 	private JButton btnBack;
+	private JButton btnUpdateChat;
 
 	private JList groupJList;
 	
@@ -207,6 +208,10 @@ public class MainChat extends JFrame {
 		label = new JLabel(new ImageIcon("Images/TalkIcon.png"));
 		label.setBounds(737, 16, 67, 70);
 		contentPane.add(label);
+		
+		btnUpdateChat = new JButton("Update Chat");
+		btnUpdateChat.setBounds(539, 559, 117, 29);
+		contentPane.add(btnUpdateChat);
 		groupJList.addListSelectionListener(new ListSelectionListener() {
 
 			@Override
@@ -217,7 +222,6 @@ public class MainChat extends JFrame {
 			private void groupJListValueChanged(ListSelectionEvent evt) {
 				// TODO Auto-generated method stub
 				selectedGroup = (String) groupJList.getSelectedValue();
-				messageTextArea.setText(selectedGroup);
 			}
 		});
 	}
@@ -280,7 +284,16 @@ public class MainChat extends JFrame {
 	public void setGroupNameLbl() {
 		this.groupNameLbl.setText(selectedGroup);
 		this.groupUsersLbl.setText(selectedGroup + "'s Users");
-
+	}
+	public String getExistingGrp() {
+		return this.groupNameLbl.getText().toString();
+	}
+	public JButton getUpdateChatBtn() {
+		return this.btnUpdateChat;
+	}
+	
+	public void clearSelectedGroup() {
+		this.selectedGroup = "";
 	}
 
 	public void initializeUsersJList() {
@@ -314,7 +327,6 @@ public class MainChat extends JFrame {
 			}
 		});
 	}
-	
 }
 
 

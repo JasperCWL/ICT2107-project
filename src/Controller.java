@@ -1,3 +1,4 @@
+import java.awt.Dialog;
 import java.io.File;
 import java.io.IOException;
 import java.net.*;
@@ -30,7 +31,6 @@ public class Controller {
 
 	private String UUN = "UpdateUsername";
 	private String UGN = "UpdateGroupname";
-	private String UGL = "UpdateGroupList";
 
 	private String LC = "LeftChat";
 	private String LG = "LeftGroup";
@@ -141,36 +141,46 @@ public class Controller {
 	}
 
 	public void updateGroupList(String groupName, String ipAddress) throws IOException {
-		sendPackets(UGL, groupName, ipAddress);
+		sendPackets(UGN, groupName, ipAddress);
 	}
 
+	public String convertIPAddress(int ip) {
+		String basicIP = "230.1.";
+		int thirdOctect = ip/255;
+		int fourthOctet = ip%255;
+		String fullIP = basicIP + thirdOctect + "." + fourthOctet;
+		return fullIP;
+	}
 	public void createGroup(){
 		String groupName = view.getCreateGroupTextField().getText();
-		String ipAddress = "230.1.1." + IPCOUNTER;
+		String ipAddress = convertIPAddress(IPCOUNTER);
 		String msg = groupName + " is created!";
 		try {
 			updateGroupList(groupName, ipAddress);
 			IPCOUNTER++;
+//			archive.createChatArchive(groupName);
 		} catch (IOException e1) {
 			e1.printStackTrace();
 		}
+		//ensure that there is no existing ip address that the group name is holding
 		if(model.checkIfGroupAddrExist(ipAddress) == false){
 			model.setGroupList(groupName, ipAddress);
 			view.getMessageTextArea().append(model.getGroupAddr(groupName));
 		}
-		view.getMessageTextArea().append(msg + "\n");
-		try {
-			archive.createChatArchive(groupName);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+//		model.setGroupLeaderList(groupName);
+		view.getMessageTextArea().append(msg + "\n");	
 	}
-
-	//	public String createNewAddress() {
-	//		
-	//	}
-
+	
+	public void updateGroupName() throws IOException {
+		String names = model.getGrpNameToBeUpdated();
+		String[] namesArray = names.split(" ");
+		String newGrpName = namesArray[0];
+		String oldGrpName = namesArray[1];
+		String ip = model.getGroupAddr(oldGrpName);
+		updateGroupList(newGrpName, oldGrpName + " " + ip);
+		model.replaceGrpName(newGrpName, oldGrpName, ip);
+		privateChat.refreshGroupList();
+	}
 
 	//search in default chat for usernames duplicates
 	public void checkIfUsernameExists() throws IOException {
@@ -185,7 +195,6 @@ public class Controller {
 			String userName = view.getUsernameTextField().getText();
 			sendPackets(CUNE, userName);
 		}
-
 	}
 
 	public void addToGroup(String groupName, String username) {
@@ -213,6 +222,21 @@ public class Controller {
 		}
 	}
 
+
+	//search in default chat for groupname duplicates
+	public void checkIfGroupExists(String newName) throws IOException {	
+		if(model.getGroupList().containsKey(newName)) {
+			view.getErrorMsg().setText("Groupname is already in used.\n");
+		}
+		else 
+		{
+			SEARCHING = true;
+			SEARCHINGGROUP = true;
+			String ipAddress = IPCOUNTER+"";
+			// send a packet to notify default group if they have seen this group name
+			sendPackets(CGNE, newName, ipAddress);
+		}
+	}
 	//reply that groupname exists
 	public void replyGroupExists(String groupName) throws IOException {
 		// send a packet to notify default group if they have seen this group name
@@ -300,15 +324,24 @@ public class Controller {
 						view.getMessageTextArea().append("Username already taken, please choose another username.\n");		
 					}
 					else if(msg[CMD].equals(IPE)) {
-						IPCOUNTER = Integer.parseInt(msg[PREVIOUS])+1;
-						view.getErrorMsg().setText("Ip address already taken, please try again.\n");
-						view.getMessageTextArea().append("Ip address already taken, please try again.\n");		
+						IPCOUNTER = Integer.parseInt(msg[PREVIOUS]);
+						createGroup();	
+						privateChat.refreshGroupList();
+						SEARCHINGGROUP = false;
 					}
 				} catch (SocketTimeoutException e) {	
 					if(SEARCHINGGROUP) {
-						createGroup();
-						privateChat.refreshGroupList();
-						SEARCHINGGROUP = false;
+						if(!model.isGrpNameUpdating()) {
+							createGroup();	
+							privateChat.refreshGroupList();
+							SEARCHINGGROUP = false;
+						}
+						else {
+							updateGroupName();
+							privateChat.refreshGroupList();
+							SEARCHINGGROUP = false;
+							model.grpNameNotUpdating();
+						}
 					}
 					else if(SEARCHINGUSER) {
 						updateUserName();
@@ -321,6 +354,14 @@ public class Controller {
 			else {
 				if(!model.getUsersToAddMap().isEmpty()) {
 					sendInvites();
+				}
+				else if(model.isGrpNameUpdating()) {
+					String names = model.getGrpNameToBeUpdated();
+					String[] namesArray = names.split(" ");
+					String newGrpName = namesArray[0];
+					String oldGrpName = namesArray[1];
+					String ip = model.getGroupAddr(oldGrpName);
+					checkIfGroupExists(newGrpName);
 				}
 				try {
 					//defaultMulticastSocket.connect(InetAddress.getByName("230.1.1.1"), 6789);
@@ -375,13 +416,23 @@ public class Controller {
 								if(!model.getCurrentGroupNameList().isEmpty())
 									model.setCurrentGroupNameList(groupName, msg[PREVIOUS]);
 							}
-
 							privateChat.refreshUserList();
+						}
+						else if(msg[CMD].equals(UGN)) {
+							if(model.getGroupAddr(msg[PREVIOUS])!=null) {
+								model.replaceGrpName(msg[NAME], msg[PREVIOUS], msg[4]);
+								if(model.getGroupLeaderList().contains(msg[PREVIOUS])) {
+									model.getGroupLeaderList().remove(msg[PREVIOUS]);
+									model.getGroupLeaderList().add(msg[NAME]);
+								}
+							}
+								
 						}
 						else if(msg[CMD].equals("Invitation") && msg[NAME].equals(model.getUsername())) {
 							int ipIndex = 4;
 							view.getMessageTextArea().append("Groupname: "+msg[PREVIOUS]+" \nIP: " + msg[ipIndex] );
 							model.setGroupList(msg[PREVIOUS], msg[ipIndex]);
+//							archive.createChatArchive(msg[PREVIOUS]);
 							privateChat.refreshGroupList();
 						}
 						else if(msg[CMD].equals("IMG")) {

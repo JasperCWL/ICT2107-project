@@ -24,6 +24,7 @@ import sun.net.www.content.audio.x_aiff;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import javax.swing.JLabel;
+import javax.swing.JTextField;
 
 public class UserLists extends JDialog {
 	private Model model;
@@ -36,6 +37,7 @@ public class UserLists extends JDialog {
 	private JLabel currentUserLbl;
 	private JLabel currentGroupLbl;
 	private JList groupJList;
+	private JTextField editGrpNameLbl;
 
 	
 	/**
@@ -43,10 +45,6 @@ public class UserLists extends JDialog {
 	 */
 	public static void main(String[] args) {
 		try {
-//			UserLists dialog = new UserLists();
-//			dialog.writeText();
-//			dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
-//			dialog.setVisible(true);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -74,6 +72,8 @@ public class UserLists extends JDialog {
 						compile();
 					}
 				});
+				{
+				}
 				okButton.setActionCommand("OK");
 				buttonPane.add(okButton);
 //				getRootPane().setDefaultButton(okButton);
@@ -120,11 +120,13 @@ public class UserLists extends JDialog {
 			}
         });
 		{
-			groupJList = new JList();
-			groupJList.setBounds(16, 24, 165, 216);
 			groupList = model.getGroupnameList();
-			groupJList.setModel(new AbstractListModel(){
-				
+		}
+		getContentPane().add(maList);
+		groupJList = new JList();
+		groupJList.setBounds(16, 24, 165, 186);
+		groupJList.setModel(new AbstractListModel(){
+			
 	            @Override
 	            public int getSize() {
 	                return groupList.size();
@@ -134,23 +136,21 @@ public class UserLists extends JDialog {
 	            public Object getElementAt(int i) {
 	                return groupList.get(i);
 	            }
-			});
-	        groupJList.addListSelectionListener(new ListSelectionListener() {
+		});
+		groupJList.addListSelectionListener(new ListSelectionListener() {
 
-	            @Override
-	            public void valueChanged(ListSelectionEvent evt) {
-	                groupJListValueChanged(evt);
-	            }        
+		    @Override
+		    public void valueChanged(ListSelectionEvent evt) {
+		        groupJListValueChanged(evt);
+		    }        
 
 				private void groupJListValueChanged(ListSelectionEvent evt) {
 					// TODO Auto-generated method stub
 		            String group = (String) groupJList.getSelectedValue();
 					currentGroupLbl.setText(group);
 				}				
-	        });
-		}
+		});
 		getContentPane().add(groupJList);
-		getContentPane().add(maList);
 		{
 			JLabel lblNewLabel = new JLabel("All Users");
 			lblNewLabel.setBounds(328, 6, 61, 16);
@@ -171,6 +171,21 @@ public class UserLists extends JDialog {
 			currentUserLbl.setBounds(186, 142, 78, 16);
 			getContentPane().add(currentUserLbl);
 		}	
+		{
+			JButton btnEdit = new JButton("Edit");
+			btnEdit.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					editGrpName();
+				}
+			});
+			btnEdit.setBounds(131, 211, 50, 29);
+			getContentPane().add(btnEdit);
+		}
+		
+		editGrpNameLbl = new JTextField();
+		editGrpNameLbl.setBounds(16, 212, 117, 28);
+		getContentPane().add(editGrpNameLbl);
+		editGrpNameLbl.setColumns(10);
 	}
 
 	public String getCurrentUser() {
@@ -185,5 +200,8 @@ public class UserLists extends JDialog {
 		String currentUser = getCurrentUser();
 		String currentGroup = getCurrentGroup();
 		model.setUsersToAddMap(currentUser, currentGroup);
+	}
+	public void editGrpName() {
+		model.setGrpNameToBeUpdated(this.editGrpNameLbl.getText().toString(), currentGroupLbl.getText());
 	}
 }

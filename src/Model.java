@@ -8,7 +8,8 @@ public class Model {
 
 	private boolean firstTime = true;
     private String username = "";
-    
+    private String grpNameToBeUpdated = "";
+    private boolean updatingGrpName = false;
     //Array containing group name and their respective ip address
     private Map<String, String> groupList = new HashMap<>();
     
@@ -25,6 +26,8 @@ public class Model {
     //Temp array for current group user list
     private ArrayList<String> currentGroupNameList = new ArrayList<>();
 
+    private ArrayList<String> groupLeaderList = new ArrayList<>();
+    
     public String getUsername(){
         return username;
     }
@@ -45,6 +48,12 @@ public class Model {
     		}
     }
     
+    public void clearGroupList(String groupName) {
+    		groupList.remove(groupName);
+    		groupnameList.remove(groupName);
+    		currentGroupNameList.clear();
+    }
+    
     public void setNameList(String userName){
         nameList.add(userName);
     }
@@ -60,6 +69,12 @@ public class Model {
         return null;
     }
 
+    public void replaceGrpName(String newName, String oldName, String ip) {
+    		this.groupList.remove(oldName);
+    		this.groupList.put(newName, ip);
+    		int index = this.groupnameList.indexOf(oldName);
+    		this.groupnameList.set(index, newName);
+    }
     public boolean checkIfGroupAddrExist(String ipAddress){
         if(groupList.containsValue(ipAddress))
             return true;
@@ -121,5 +136,31 @@ public class Model {
     
     public void clearCurrentGroupNameList() {
     		this.currentGroupNameList.clear();
+    }
+    
+    public ArrayList<String> getGroupLeaderList() {
+    		return this.groupLeaderList;
+    }
+    public void setGroupLeaderList(String groupname) {
+    		this.groupLeaderList.add(groupname); 
+    }
+    public void removeFromLeaderList(String groupname) {
+    		this.groupLeaderList.remove(groupname);
+    }
+    public boolean isAGroupLeader(String groupname) {
+    		return this.groupLeaderList.contains(groupname);
+    }
+    public void setGrpNameToBeUpdated(String updatedName, String currentName) {
+    		this.grpNameToBeUpdated = updatedName + " " + currentName;
+    		updatingGrpName = true;
+    }
+    public String getGrpNameToBeUpdated() {
+    		return this.grpNameToBeUpdated;
+    }
+    public boolean isGrpNameUpdating() {
+    		return updatingGrpName;
+    }
+    public void grpNameNotUpdating() {
+    		this.updatingGrpName = false;
     }
 }
