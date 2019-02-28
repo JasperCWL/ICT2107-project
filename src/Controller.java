@@ -1,10 +1,16 @@
+
 import java.awt.Dialog;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.*;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.Set;
+
+import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 public class Controller {
 
@@ -81,7 +87,10 @@ public class Controller {
 
 		view.getUpdateUsernameButton().addActionListener(e->{
 			try {
-				checkIfUsernameExists();
+//				if(validatedUserName())
+					checkIfUsernameExists();
+//				else
+//					JOptionPane.showMessageDialog(null, "invalid username! Please change");			
 			} catch (IOException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
@@ -97,24 +106,60 @@ public class Controller {
 
 		view.getCreateGroupButton().addActionListener(e->{
 			try {
+				privateChat = new PrivateChat(view, model, profile, archive);
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+		});
+
+		view.getCreateGroupButton().addActionListener(e->{
+			try {
 				checkIfGroupExists();
 			} catch (IOException e1) {
 				e1.printStackTrace();
 			}
 		});
-		view.getSendMessageButton().addActionListener(e->{
-			try {
-				//				sendMessage();
-				profile.requestImage("Ad");
-				sendPackets("IMG", "SSS");
-			} catch (IOException e1) {
-
-			}
-		});
-		view.getUsersButton().addActionListener(e->{
-			UserLists dialog = new UserLists(model);
-			dialog.setVisible(true);
-		});
+		//view.getSendMessageButton().addActionListener(e->{	
+		view.getLabelClicked().addMouseListener(new MouseAdapter() {
+		      public void mouseClicked(MouseEvent me) {	
+			//When file upload button is clicked, it will open file selection frame
+			JFileChooser jfile = new JFileChooser();
+			jfile.setCurrentDirectory(new File(System.getProperty("user.home")));		        
+			// Filter only to select image files
+			FileNameExtensionFilter filter = new FileNameExtensionFilter("*.Image", "jpg", "png");
+			jfile.addChoosableFileFilter(filter);
+			
+			int result = jfile.showSaveDialog(null); // return 0 if success
+			
+			//System.out.println(""+result);
+			File selectedFile = jfile.getSelectedFile();
+			String filename = selectedFile.getName();
+			//System.out.println(""+filename);
+			if(filename.endsWith(".jpg")||filename.endsWith(".JPG")||filename.endsWith(".png")||filename.endsWith(".PNG")) {
+			    if(result == JFileChooser.APPROVE_OPTION) {
+			        String path = selectedFile.getAbsolutePath();
+			        JOptionPane.showMessageDialog(null, path);
+			        profile.setImage(path);
+			    }
+			}			
+			
+//			sendMessage();
+//			profile.requestImage("Ad");
+//			sendPackets("IMG", "SSS");
+		}});	
+		
+//		view.getUsersButton().addActionListener(e->{
+//			UserLists dialog = new UserLists(model);
+//			dialog.setVisible(true);
+//		});
+		
+		view.getMemberLabelClicked().addMouseListener(new MouseAdapter() {
+		      public void mouseClicked(MouseEvent me) {	
+		    	  UserLists dialog = new UserLists(model);
+					dialog.setVisible(true);
+			    }
+			});			
 	}
 
 	public void leaveButton() throws IOException {
@@ -122,6 +167,18 @@ public class Controller {
 		multicastSocket.leaveGroup(InetAddress.getByName(sendAddress));
 		// disable and enable buttons
 		view.getSendMessageButton().setEnabled(false);
+	}
+	
+	//validate username
+	public boolean validatedUserName() {
+		String username = view.getUsernameTextField().getText();
+		String regex = "^[a-zA-Z][A-za-z0-9]{7}";
+		if(username.matches(regex))
+			return true;
+			//JOptionPane.showMessageDialog(null, "valid username");	
+		else 
+			return false;
+			//JOptionPane.showMessageDialog(null, "invalid username! Please change");			
 	}
 
 	//update own username

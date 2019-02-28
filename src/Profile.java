@@ -10,6 +10,7 @@ import java.net.URL;
 import java.nio.file.Files;
 
 import javax.imageio.ImageIO;
+import javax.swing.JOptionPane;
 
 public class Profile {
 
@@ -27,6 +28,17 @@ public class Profile {
 	Thread imageReceivingThread;
 	
 	BufferedImage image = null;
+	
+	//get profile picture
+	public File getImagePath() {
+		return this.profilePic;
+	}
+	
+	public void setImage(String filepath) {
+		//update the file path		
+		//set to profilePicLocation
+		this.profilePicLocation = filepath;
+	}
 
 	//hard coded method to upload photo into application
 	public void upLoadImage() {
