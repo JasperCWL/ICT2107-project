@@ -64,6 +64,7 @@ public class PrivateChat {
 					joinPrivateGroup();
 				else
 					updateGroupMulticast();
+				view.getSendMessageButton().setEnabled(true);
 			} catch (IOException e1) {
 			}
 		});

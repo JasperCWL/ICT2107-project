@@ -1,6 +1,7 @@
 
 import java.awt.Dialog;
-
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.IOException;
 import java.net.*;
@@ -63,7 +64,7 @@ public class Controller {
 	private int NAME = 2;
 	private int PREVIOUS = 3;
 
-	public Controller(UI frame, Model model, Archive archive, Profile profile){
+	public Controller(UI frame, Model model, Archive archive, Profile profile) throws IOException{
 		this.view = frame;
 		this.model = model;
 		this.archive = archive;
@@ -120,46 +121,46 @@ public class Controller {
 				e1.printStackTrace();
 			}
 		});
-		//view.getSendMessageButton().addActionListener(e->{	
-		view.getLabelClicked().addMouseListener(new MouseAdapter() {
-		      public void mouseClicked(MouseEvent me) {	
-			//When file upload button is clicked, it will open file selection frame
-			JFileChooser jfile = new JFileChooser();
-			jfile.setCurrentDirectory(new File(System.getProperty("user.home")));		        
-			// Filter only to select image files
-			FileNameExtensionFilter filter = new FileNameExtensionFilter("*.Image", "jpg", "png");
-			jfile.addChoosableFileFilter(filter);
-			
-			int result = jfile.showSaveDialog(null); // return 0 if success
-			
-			//System.out.println(""+result);
-			File selectedFile = jfile.getSelectedFile();
-			String filename = selectedFile.getName();
-			//System.out.println(""+filename);
-			if(filename.endsWith(".jpg")||filename.endsWith(".JPG")||filename.endsWith(".png")||filename.endsWith(".PNG")) {
-			    if(result == JFileChooser.APPROVE_OPTION) {
-			        String path = selectedFile.getAbsolutePath();
-			        JOptionPane.showMessageDialog(null, path);
-			        profile.setImage(path);
-			    }
-			}			
-			
-//			sendMessage();
-//			profile.requestImage("Ad");
-//			sendPackets("IMG", "SSS");
-		}});	
-		
-//		view.getUsersButton().addActionListener(e->{
-//			UserLists dialog = new UserLists(model);
-//			dialog.setVisible(true);
+//		view.getSendMessageButton().addActionListener(e->{	
+////		view.getLabelClicked().addMouseListener(new MouseAdapter() {
+////		      public void mouseClicked(MouseEvent me) {	
+//			//When file upload button is clicked, it will open file selection frame
+//			JFileChooser jfile = new JFileChooser();
+//			jfile.setCurrentDirectory(new File(System.getProperty("user.home")));		        
+//			// Filter only to select image files
+//			FileNameExtensionFilter filter = new FileNameExtensionFilter("*.Image", "jpg", "png");
+//			jfile.addChoosableFileFilter(filter);
+//			
+//			int result = jfile.showSaveDialog(null); // return 0 if success
+//			
+//			//System.out.println(""+result);
+//			File selectedFile = jfile.getSelectedFile();
+//			String filename = selectedFile.getName();
+//			//System.out.println(""+filename);
+//			if(filename.endsWith(".jpg")||filename.endsWith(".JPG")||filename.endsWith(".png")||filename.endsWith(".PNG")) {
+//			    if(result == JFileChooser.APPROVE_OPTION) {
+//			        String path = selectedFile.getAbsolutePath();
+//			        JOptionPane.showMessageDialog(null, path);
+//			        profile.setImage(path);
+//			    }
+//			}			
+//			
+////			sendMessage();
+////			profile.requestImage("Ad");
+////			sendPackets("IMG", "SSS");
+////		}});	
 //		});
+		view.getUsersButton().addActionListener(e->{
+			UserLists dialog = new UserLists(model);
+			dialog.setVisible(true);
+		});
 		
-		view.getMemberLabelClicked().addMouseListener(new MouseAdapter() {
-		      public void mouseClicked(MouseEvent me) {	
-		    	  UserLists dialog = new UserLists(model);
-					dialog.setVisible(true);
-			    }
-			});			
+//		view.getMemberLabelClicked().addMouseListener(new MouseAdapter() {
+//		      public void mouseClicked(MouseEvent me) {	
+//		    	  UserLists dialog = new UserLists(model);
+//					dialog.setVisible(true);
+//			    }
+//			});			
 	}
 
 	public void leaveButton() throws IOException {
@@ -173,12 +174,14 @@ public class Controller {
 	public boolean validatedUserName() {
 		String username = view.getUsernameTextField().getText();
 		String regex = "^[a-zA-Z][A-za-z0-9]{7}";
-		if(username.matches(regex))
+		if(username.matches(regex)) {
+			JOptionPane.showMessageDialog(null, "valid username");	
 			return true;
-			//JOptionPane.showMessageDialog(null, "valid username");	
-		else 
+		}
+		else {
+			JOptionPane.showMessageDialog(null, "invalid username! Please change");	
 			return false;
-			//JOptionPane.showMessageDialog(null, "invalid username! Please change");			
+			}		
 	}
 
 	//update own username
